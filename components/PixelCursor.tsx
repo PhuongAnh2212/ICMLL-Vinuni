@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { gsap } from "@/lib/gsap";
 
 const CELL = 40; // px, size of one pixel cube
 const COLORS = ["#7be87a", "#4aa574", "#a4e0a8", "#ffffff", "#3f9f75"];
@@ -50,7 +50,12 @@ export default function PixelCursor() {
           if ((dx || dy) && Math.random() < 0.18) light(cx + dx, cy + dy, 0.55 + Math.random() * 0.3);
     };
 
+    // the effect only lives on the home section
+    const home = () => document.getElementById("home")!.getBoundingClientRect();
+
     const onMove = (e: PointerEvent) => {
+      const hr = home();
+      if (e.clientY < hr.top || e.clientY > hr.bottom) return onLeave();
       const r = canvas.getBoundingClientRect();
       const x = e.clientX - r.left;
       const y = e.clientY - r.top;
@@ -72,14 +77,23 @@ export default function PixelCursor() {
       } else if (!last) stamp(cx, cy);
       last = { cx, cy };
     };
-    const onLeave = () => {
+    function onLeave() {
+      if (!head.on && !last) return;
       head.on = false;
       last = null;
       gsap.to(head, { s: 0, duration: 0.25 });
-    };
+    }
 
     const tick = (_t: number, dt: number) => {
       ctx.clearRect(0, 0, w, h);
+      const hr = home();
+      const top = Math.max(hr.top, 0);
+      const bottom = Math.min(hr.bottom, h);
+      if (bottom <= top) return cells.clear(); // home is scrolled out of view
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, top, w, bottom - top);
+      ctx.clip();
       const decay = dt / 900; // ~0.9s trail
       cells.forEach((cell, k) => {
         cell.a -= decay;
@@ -103,6 +117,7 @@ export default function PixelCursor() {
         ctx.strokeRect(gx + o + 1, gy + o + 1, s - 2, s - 2);
       }
       ctx.globalAlpha = 1;
+      ctx.restore();
     };
 
     window.addEventListener("pointermove", onMove);

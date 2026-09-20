@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Space_Mono, Epilogue } from "next/font/google";
+import { Geist_Mono, Epilogue } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
-const mono = Space_Mono({
+const mono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-mono",
@@ -20,8 +21,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${mono.variable} ${sans.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${mono.variable} ${sans.variable}`} suppressHydrationWarning>
+      <body>
+        {/* returning visitors: hide the loader before first paint */}
+        <Script id="loader-seen" strategy="beforeInteractive">
+          {`try{if(sessionStorage.getItem("icmll-loader-seen")==="1")document.documentElement.dataset.seen="1"}catch(e){}`}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
