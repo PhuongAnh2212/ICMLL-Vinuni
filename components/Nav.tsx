@@ -50,6 +50,7 @@ export default function Nav({ current }: { current?: string }) {
 
   // ---------- mobile menu: pixel cells fill the screen, then the links appear ----------
   const tl = useRef<gsap.core.Timeline | null>(null);
+  const openRef = useRef(false);
 
   const openMenu = () => {
     const m = menu.current!;
@@ -70,6 +71,7 @@ export default function Nav({ current }: { current?: string }) {
     tl.current?.kill();
     m.classList.add("is-open");
     document.documentElement.style.overflow = "hidden";
+    openRef.current = true;
     setOpen(true);
     tl.current = gsap
       .timeline()
@@ -78,39 +80,59 @@ export default function Nav({ current }: { current?: string }) {
       .to(".menu-item", { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.07, ease: "power3.out" }, "-=0.15");
   };
 
-  const closeMenu = () => {
-    const m = menu.current!;
-    setOpen(false);
-    tl.current?.kill();
-    tl.current = gsap
-      .timeline({
-        onComplete: () => {
-          m.classList.remove("is-open");
-          document.documentElement.style.overflow = "";
-        },
-      })
-      .to(".menu-item", { autoAlpha: 0, y: -10, duration: 0.2, stagger: 0.03 })
-      .to(Array.from(m.querySelectorAll(".menu-cells i")), { opacity: 0, duration: 0.2, stagger: { amount: 0.4, from: "random" } }, 0.1);
+  /** Hard reset: menu hidden, scroll unlocked. Safe to call any time. */
+  const finishClose = () => {
+    menu.current?.classList.remove("is-open");
+    document.documentElement.style.overflow = "";
   };
 
-  useEffect(
-    () => () => {
+  const closeMenu = (unlockNow = false) => {
+    const m = menu.current!;
+    openRef.current = false;
+    setOpen(false);
+    tl.current?.kill();
+    if (unlockNow) document.documentElement.style.overflow = "";
+    tl.current = gsap
+      .timeline({ onComplete: finishClose })
+      .to(".menu-item", { autoAlpha: 0, y: -10, duration: 0.2, stagger: 0.03 })
+      .to(Array.from(m.querySelectorAll(".menu-cells i")), { opacity: 0, duration: 0.2, stagger: { amount: 0.4, from: "random" } }, 0.1);
+    // safety net: never leave an invisible menu blocking the page
+    window.setTimeout(() => {
+      if (!openRef.current) finishClose();
+    }, 1500);
+  };
+
+  useEffect(() => {
+    // leaving the mobile layout (rotate / resize) or pressing Esc must never leave the menu or scroll lock behind
+    const mq = window.matchMedia("(max-width: 800px)");
+    const reset = () => {
+      if (mq.matches) return;
+      tl.current?.kill();
+      openRef.current = false;
+      setOpen(false);
+      finishClose();
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && openRef.current && closeMenu();
+    mq.addEventListener("change", reset);
+    window.addEventListener("keydown", esc);
+    return () => {
+      mq.removeEventListener("change", reset);
+      window.removeEventListener("keydown", esc);
       tl.current?.kill();
       document.documentElement.style.overflow = "";
-    },
-    []
-  );
+    };
+  }, []);
 
   const go = (e: React.MouseEvent, id: string, fromMenu = false) => {
     e.preventDefault();
     const target = document.getElementById(id);
-    if (fromMenu) closeMenu();
+    if (fromMenu) closeMenu(true);
     if (!target) return;
     gsap.to(window, {
-      scrollTo: { y: id === "home" ? 0 : target, offsetY: NAV_HEIGHT - 1, autoKill: true },
+      scrollTo: { y: id === "home" ? 0 : target, offsetY: NAV_HEIGHT - 1, autoKill: !fromMenu },
       duration: 1.2,
       ease: "power3.inOut",
-      delay: fromMenu ? 0.5 : 0,
+      delay: fromMenu ? 0.45 : 0,
     });
     history.replaceState(null, "", `#${id}`);
   };
@@ -163,7 +185,7 @@ export default function Nav({ current }: { current?: string }) {
           {NAV.map((n) => (
             <li key={n.id} className="menu-item">
               {current ? (
-                <Link href={href(n.id)} className={`menu-link${n.id === active ? " active" : ""}`} onClick={closeMenu}>
+                <Link href={href(n.id)} className={`menu-link${n.id === active ? " active" : ""}`} onClick={() => closeMenu(true)}>
                   {n.label}
                 </Link>
               ) : (
