@@ -5,7 +5,7 @@ import { gsap } from "@/lib/gsap";
 import { markReady } from "@/lib/loader";
 
 const SIZE = 56; // px per pixel cell
-const TONES = ["#7be87a", "#86ea85", "#72de72", "#7be87a"];
+const TONES = ["#4b3df0", "#ff5b3d", "#16161c", "#4b3df0"];
 const SEEN_KEY = "icmll-loader-seen"; // once per browser session
 
 const seen = () => {
@@ -16,7 +16,7 @@ const seen = () => {
   }
 };
 
-/** Green pixel-block cover with a counter; dissolves cell by cell to reveal the site. */
+/** Indigo pixel-block cover with a counter; dissolves cell by cell to reveal the site. */
 export default function Loader() {
   const root = useRef<HTMLDivElement>(null);
 

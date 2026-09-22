@@ -8,7 +8,7 @@ import { onReady } from "@/lib/loader";
 import Socials from "./Socials";
 
 const CELL = 48; // px per pixel cell in the mobile menu
-const TONES = ["#7be87a", "#86ea85", "#72de72", "#7be87a"];
+const TONES = ["#4b3df0", "#ff5b3d", "#16161c", "#4b3df0"];
 
 /** `current` is set on sub-pages: links go back to the home sections and that item stays highlighted. */
 export default function Nav({ current }: { current?: string }) {

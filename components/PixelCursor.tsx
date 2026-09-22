@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 
 const CELL = 40; // px, size of one pixel cube
-const COLORS = ["#7be87a", "#4aa574", "#a4e0a8", "#ffffff", "#3f9f75"];
-const HEAD = "#1d1d1d";
+const COLORS = ["#4b3df0", "#ff5b3d", "#372fb0", "#ffffff", "#16161c"];
+const HEAD = "#16161c";
 
 type Cell = { a: number; c: string };
 
@@ -110,7 +110,7 @@ export default function PixelCursor() {
         const s = CELL * head.s;
         const o = (CELL - s) / 2;
         ctx.globalAlpha = 1;
-        ctx.fillStyle = "rgba(123,232,122,0.9)";
+        ctx.fillStyle = "rgba(75,61,240,0.9)";
         ctx.fillRect(gx + o, gy + o, s, s);
         ctx.strokeStyle = HEAD;
         ctx.lineWidth = 2;

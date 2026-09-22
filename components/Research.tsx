@@ -18,7 +18,7 @@ const COLS = 9;
 const ROWS = 6;
 const IMG_COL = 4; // first column of the image block
 const IMG_ROW = 3; // first row of the image block
-const GREEN = "#7be87a";
+const ACCENT = "#4b3df0";
 
 const CELLS = Array.from({ length: COLS * ROWS }, (_, i) => {
   const c = i % COLS;
@@ -50,7 +50,7 @@ function WorkCard({ title, text, img }: (typeof WORKS)[number]) {
     const stray = cells(".px.ring");
     gsap.killTweensOf([...inner, ...stray]);
     gsap.set(stray, { opacity: 0 });
-    gsap.to(inner, { opacity: 1, backgroundColor: GREEN, duration: 0.12, stagger: { amount: 0.25, from: "random" } });
+    gsap.to(inner, { opacity: 1, backgroundColor: ACCENT, duration: 0.12, stagger: { amount: 0.25, from: "random" } });
   };
 
   return (

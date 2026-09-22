@@ -65,6 +65,7 @@ export default function Background() {
 
   return (
     <div ref={root} className="bg" aria-hidden>
+      <div className="bg-grid" />
       <div data-depth="-60" className="layer">
         <div className="bg-scroll">
           <div className="bg-blob b1" />
